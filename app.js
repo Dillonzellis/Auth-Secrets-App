@@ -2,14 +2,13 @@ require("dotenv").config();
 const express = require("express");
 const mongoose = require("mongoose");
 const ejs = require("ejs");
+const encrypt = require("mongoose-encryption");
 const User = require("./models/User");
 
 const PORT = 3000;
 const dbUrl = "mongodb://localhost:27017/userDB";
 
 const app = express();
-
-// process.env.SECRET;
 
 app.set("view engine", "ejs");
 app.use(express.urlencoded({ extended: true }));
