@@ -1,8 +1,10 @@
-require("dotenv").config();
+// require("dotenv").config();
 const express = require("express");
 const mongoose = require("mongoose");
 const ejs = require("ejs");
-const encrypt = require("mongoose-encryption");
+const bcrypt = require("bcryptjs");
+const salt = bcrypt.genSaltSync(10);
+
 const User = require("./models/User");
 
 const PORT = 3000;
@@ -34,9 +36,11 @@ app
         console.log(err);
       } else {
         if (foundUser) {
-          if (foundUser.password === password) {
-            res.render("secrets");
-          }
+          bcrypt.compare(password, foundUser.password, (err, results) => {
+            if (results === true) {
+              res.render("secrets");
+            }
+          });
         }
       }
     });
@@ -48,16 +52,18 @@ app
     res.render("register");
   })
   .post((req, res) => {
-    const newUser = new User({
-      email: req.body.username,
-      password: req.body.password,
-    });
-    newUser.save((err) => {
-      if (!err) {
-        res.render("secrets");
-      } else {
-        console.log(err);
-      }
+    bcrypt.hash(req.body.password, salt, (err, hash) => {
+      const newUser = new User({
+        email: req.body.username,
+        password: hash,
+      });
+      newUser.save((err) => {
+        if (!err) {
+          res.render("secrets");
+        } else {
+          console.log(err);
+        }
+      });
     });
   });
 
